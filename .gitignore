@@ -1,0 +1,13 @@
+
+*.config
+*.vcxproj
+*.user
+*.obj
+*.tlog
+*.recipe
+*.log
+*.pch
+*.CopyComplete
+x64/Debug/test_sqlite_manager.vcxproj.FileListAbsolute.txt
+*.pdb
+x64/Release/test_sqlite_manager.vcxproj.FileListAbsolute.txt
