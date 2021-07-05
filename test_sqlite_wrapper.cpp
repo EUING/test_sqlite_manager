@@ -34,89 +34,115 @@ TEST(SqliteTest, WrongPath16) {
 TEST(SqliteTest, ExecuteUpdate8) {
 	std::unique_ptr<sqlite_manager::utf8::SqliteWrapper> temp = sqlite_manager::utf8::SqliteWrapper::Create(":memory:");
 
-	int result = temp->ExecuteUpdate("CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT NOT NULL, UNIQUE(parent_id, name));");
-	ASSERT_EQ(0, result);
+	sqlite_manager::SqlError result = temp->ExecuteUpdate("CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT NOT NULL, UNIQUE(parent_id, name));");
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
 
 	std::wstring utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(0, '테스트', '123');");  // multibyte to utf-16
 	std::string utf8 = CW2A(utf16.c_str(), CP_UTF8);  // utf-16 to utf-8
 
 	result = temp->ExecuteUpdate(utf8);
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	auto change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(0, '테스트1', '123');");
 	utf8 = CW2A(utf16.c_str(), CP_UTF8);
 
 	result = temp->ExecuteUpdate(utf8);
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(0, '테스트2', '123');");
 	utf8 = CW2A(utf16.c_str(), CP_UTF8);
 
 	result = temp->ExecuteUpdate(utf8);
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(0, '테스트3', '123');");
 	utf8 = CW2A(utf16.c_str(), CP_UTF8);
 
 	result = temp->ExecuteUpdate(utf8);
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	result = temp->ExecuteUpdate("UPDATE items SET hash = '456' WHERE parent_id = 0;");
-	ASSERT_EQ(4, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(4, change_row.value());
 
 	result = temp->ExecuteUpdate("UPDATE items SET hash = '456' WHERE parent_id = 1;");
-	ASSERT_EQ(0, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(0, change_row.value());
 }
 
 TEST(SqliteTest, ExecuteUpdate16) {
 	std::unique_ptr<sqlite_manager::utf16::SqliteWrapper> temp = sqlite_manager::utf16::SqliteWrapper::Create(L":memory:");
 	
-	int result = temp->ExecuteUpdate(L"CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT NOT NULL, UNIQUE(parent_id, name));");
-	ASSERT_EQ(0, result);
+	sqlite_manager::SqlError result = temp->ExecuteUpdate(L"CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT NOT NULL, UNIQUE(parent_id, name));");
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
 
 	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(0, '테스트', '123');");
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	auto change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(0, '테스트1', '123');");
 	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(0, '테스트2', '123');");
 	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(0, '테스트3', '123');");
 
 	result = temp->ExecuteUpdate(L"UPDATE items SET hash = '456' WHERE parent_id = 0;");
-	ASSERT_EQ(4, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(4, change_row.value());
 
 	result = temp->ExecuteUpdate(L"UPDATE items SET hash = '456' WHERE parent_id = 1;");
-	ASSERT_EQ(0, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(0, change_row.value());
 }
 
 TEST(SqliteTest, ExecuteQuery8) {
 	std::unique_ptr<sqlite_manager::utf8::SqliteWrapper> temp = sqlite_manager::utf8::SqliteWrapper::Create(":memory:");
 
-	int result = temp->ExecuteUpdate("CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT, UNIQUE(parent_id, name));");
-	ASSERT_EQ(0, result);
+	sqlite_manager::SqlError result = temp->ExecuteUpdate("CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT, UNIQUE(parent_id, name));");
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
 
 	std::wstring utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(1, '테스트1', NULL);");  // multibyte to utf-16
 	std::string utf8 = CW2A(utf16.c_str(), CP_UTF8);  // utf-16 to utf-8
 
 	result = temp->ExecuteUpdate(utf8);
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	auto change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(2, '테스트2', '123');");  // multibyte to utf-16
 	utf8 = CW2A(utf16.c_str(), CP_UTF8);  // utf-16 to utf-8
 
 	result = temp->ExecuteUpdate(utf8);
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(3, '테스트3', NULL);");  // multibyte to utf-16
 	utf8 = CW2A(utf16.c_str(), CP_UTF8);  // utf-16 to utf-8
 
 	result = temp->ExecuteUpdate(utf8);
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(4, '테스트4', '123');");  // multibyte to utf-16
 	utf8 = CW2A(utf16.c_str(), CP_UTF8);  // utf-16 to utf-8
 
 	result = temp->ExecuteUpdate(utf8);
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	std::optional<std::vector<sqlite_manager::utf8::DataSet>> opt = temp->ExecuteQuery("SELECT * from items;");
 
@@ -149,11 +175,13 @@ TEST(SqliteTest, ExecuteQuery8) {
 TEST(SqliteTest, ExecuteQuery16) {
 	std::unique_ptr<sqlite_manager::utf16::SqliteWrapper> temp = sqlite_manager::utf16::SqliteWrapper::Create(L":memory:");
 
-	int result = temp->ExecuteUpdate(L"CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT, UNIQUE(parent_id, name));");
-	ASSERT_EQ(0, result);
+	sqlite_manager::SqlError result = temp->ExecuteUpdate(L"CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT, UNIQUE(parent_id, name));");
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
 
 	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(1, '테스트1', NULL);");
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	auto change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(2, '테스트2', '123');");
 	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(3, '테스트3', NULL);");
@@ -190,32 +218,40 @@ TEST(SqliteTest, ExecuteQuery16) {
 TEST(SqliteTest, EmptyQuery8) {
 	std::unique_ptr<sqlite_manager::utf8::SqliteWrapper> temp = sqlite_manager::utf8::SqliteWrapper::Create(":memory:");
 
-	int result = temp->ExecuteUpdate("CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT, UNIQUE(parent_id, name));");
-	ASSERT_EQ(0, result);
+	sqlite_manager::SqlError result = temp->ExecuteUpdate("CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT, UNIQUE(parent_id, name));");
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
 
 	std::wstring utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(1, '테스트1', NULL);");  // multibyte to utf-16
 	std::string utf8 = CW2A(utf16.c_str(), CP_UTF8);  // utf-16 to utf-8
 
 	result = temp->ExecuteUpdate(utf8);
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	auto change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(2, '테스트2', '123');");  // multibyte to utf-16
 	utf8 = CW2A(utf16.c_str(), CP_UTF8);  // utf-16 to utf-8
 
 	result = temp->ExecuteUpdate(utf8);
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(3, '테스트3', NULL);");  // multibyte to utf-16
 	utf8 = CW2A(utf16.c_str(), CP_UTF8);  // utf-16 to utf-8
 
 	result = temp->ExecuteUpdate(utf8);
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(4, '테스트4', '123');");  // multibyte to utf-16
 	utf8 = CW2A(utf16.c_str(), CP_UTF8);  // utf-16 to utf-8
 
 	result = temp->ExecuteUpdate(utf8);
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	std::optional<std::vector<sqlite_manager::utf8::DataSet>> opt = temp->ExecuteQuery("SELECT * from items WHERE parent_id=0;");
 
@@ -228,11 +264,13 @@ TEST(SqliteTest, EmptyQuery8) {
 TEST(SqliteTest, EmptyQuery16) {
 	std::unique_ptr<sqlite_manager::utf16::SqliteWrapper> temp = sqlite_manager::utf16::SqliteWrapper::Create(L":memory:");
 
-	int result = temp->ExecuteUpdate(L"CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT, UNIQUE(parent_id, name));");
-	ASSERT_EQ(0, result);
+	sqlite_manager::SqlError result = temp->ExecuteUpdate(L"CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT, UNIQUE(parent_id, name));");
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
 
 	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(1, '테스트1', NULL);");
-	ASSERT_EQ(1, result);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	auto change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
 
 	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(2, '테스트2', '123');");
 	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(3, '테스트3', NULL);");
@@ -244,4 +282,98 @@ TEST(SqliteTest, EmptyQuery16) {
 
 	auto v = opt.value();
 	ASSERT_TRUE(v.empty());
+}
+
+TEST(SqliteTest, WrongQuery8) {
+	std::unique_ptr<sqlite_manager::utf8::SqliteWrapper> temp = sqlite_manager::utf8::SqliteWrapper::Create(":memory:");
+
+	sqlite_manager::SqlError result = temp->ExecuteUpdate("CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT, UNIQUE(parent_id, name));");
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+
+	std::wstring utf16 = CA2W("INSERT INTO items(parent_id, name, hash) VALUES(1, '테스트1', NULL);");  // multibyte to utf-16
+	std::string utf8 = CW2A(utf16.c_str(), CP_UTF8);  // utf-16 to utf-8
+
+	result = temp->ExecuteUpdate(utf8);
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	auto change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
+
+	result = temp->ExecuteUpdate(utf8);
+	ASSERT_NE(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(0, change_row.value());
+
+	std::string last_error = temp->GetLastError();
+	ASSERT_FALSE(last_error.empty());
+
+	utf8 = "INSERT INTO items(parent_id, name, hash) VALUES(1, NULL, NULL);";
+	result = temp->ExecuteUpdate(utf8);
+	ASSERT_NE(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(0, change_row.value());
+
+	last_error = temp->GetLastError();
+	ASSERT_FALSE(last_error.empty());
+
+	utf8 = "INSERT items(parent_id, name, hash) VALUES(1, NULL, NULL);";
+	result = temp->ExecuteUpdate(utf8);
+	ASSERT_NE(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(0, change_row.value());
+
+	last_error = temp->GetLastError();
+	ASSERT_FALSE(last_error.empty());
+
+	utf8 = "INSERT INTO notable(parent_id, name, hash) VALUES(1, 'test', NULL);";
+	result = temp->ExecuteUpdate(utf8);
+	ASSERT_NE(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(0, change_row.value());
+
+	last_error = temp->GetLastError();
+	ASSERT_FALSE(last_error.empty());
+}
+
+TEST(SqliteTest, WrongQuery16) {
+	std::unique_ptr<sqlite_manager::utf16::SqliteWrapper> temp = sqlite_manager::utf16::SqliteWrapper::Create(L":memory:");
+
+	sqlite_manager::SqlError result = temp->ExecuteUpdate(L"CREATE TABLE IF NOT EXISTS items(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, parent_id INTEGER NOT NULL, name TEXT NOT NULL, hash TEXT, UNIQUE(parent_id, name));");
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+
+	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(1, '테스트1', NULL);");
+	ASSERT_EQ(sqlite_manager::SqlError::SQLITE_OK, result);
+	auto change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(1, change_row.value());
+
+	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(1, '테스트1', NULL);");
+	ASSERT_NE(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(0, change_row.value());
+
+	std::wstring last_error = temp->GetLastError();
+	ASSERT_FALSE(last_error.empty());
+
+	result = temp->ExecuteUpdate(L"INSERT INTO items(parent_id, name, hash) VALUES(1, NULL, NULL)");
+	ASSERT_NE(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(0, change_row.value());
+
+	last_error = temp->GetLastError();
+	ASSERT_FALSE(last_error.empty());
+
+	result = temp->ExecuteUpdate(L"INSERT items(parent_id, name, hash) VALUES(1, NULL, NULL)");
+	ASSERT_NE(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(0, change_row.value());
+
+	last_error = temp->GetLastError();
+	ASSERT_FALSE(last_error.empty());
+
+	result = temp->ExecuteUpdate(L"INSERT INTO notable(parent_id, name, hash) VALUES(1, 'test', NULL)");
+	ASSERT_NE(sqlite_manager::SqlError::SQLITE_OK, result);
+	change_row = temp->GetLastChangeRowCount();
+	ASSERT_EQ(0, change_row.value());
+
+	last_error = temp->GetLastError();
+	ASSERT_FALSE(last_error.empty());
 }
